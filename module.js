@@ -12,20 +12,17 @@ define(['angular'], function (ng) {
     'ui.bootstrap'
   ]);
 
-  module.config(['$provide', function ($provide) {
-    // Override angular-ui-bootstrap template location
-    var angularBootstrapDirectives = [
-      'modalBackdrop',
-      'modalWindow'
-    ];
+  module.config( [ '$provide', function( $provide ) {
+    $provide.decorator('modalBackdropDirective', [ '$delegate', function( $delegate ) {
+      $delegate[0].templateUrl = ['modules/cs_modal/views/', $delegate[0].name, '.html'].join('');
+      return $delegate;
+    }]);
 
-    for( var i = 0; i < angularBootstrapDirectives.length; i++ ) {
-      $provide.decorator(angularBootstrapDirectives[i]+'Directive', function($delegate) {
-        $delegate[0].templateUrl = ['modules/cs_modal/views/', $delegate[0].name, '.html'].join('');
-        return $delegate;
-      });
-    }
+    $provide.decorator('modalWindowDirective', [ '$delegate', function( $delegate ) {
+      $delegate[0].templateUrl = ['modules/cs_modal/views/', $delegate[0].name, '.html'].join('');
+      return $delegate;
+    }]);
   }]);
-  
+
   return module;
 });

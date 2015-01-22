@@ -1,12 +1,13 @@
-define(['angular'],function (angular) {
+define( [ 'angular', '../module' ], function( ng ) {
   'use strict';
 
-  angular
+  ng
   .module('cs_modal.services')
   .factory('ModalFactory',
     [
       '$modal',
-      function ($modal) {
+      '$rootScope',
+      function ( $modal, $rootScope ) {
         var modals = {};
 
         // @options|object
@@ -51,67 +52,81 @@ define(['angular'],function (angular) {
         // }
 
         modals.open = function ( obj, index, template, options, action ) {
-            if (arguments.length < 5) {
-                action   = options;
-                options  = template;
-                template = index;
-                index    = 1;
+          if (arguments.length < 5) {
+            action   = options;
+            options  = template;
+            template = index;
+            index    = 1;
+          }
+
+          var controller
+            , args = ['$scope', '$modalInstance'];
+
+          if ( !ng.isObject( options ) || !options.controller ) {
+            if (!ng.isObject(options)) {
+              options = {};
             }
 
-            var args = ['$scope', '$modalInstance'];
-            if (!angular.isObject(options)) {
-                options = {};
+            if (!ng.isObject(options.resolve)) {
+              options.resolve = {};
             }
 
-            if (!angular.isObject(options.resolve)) {
-                options.resolve = {};
-            }
-
-            options.resolve.obj = function() { return obj; }
-            angular.forEach(options.resolve, function (fn, key) {
-                args.push(key);
+            options.resolve.obj = function() { return obj; };
+            ng.forEach(options.resolve, function (fn, key) {
+              args.push(key);
             });
 
             // the controller
-            args.push(function ($scope, $modalInstance) {
-                var ctrl = this;
+            args.push(
+              function ($scope, $modalInstance) {
+                controller = this;
 
                 // build resolved objects into the scope
-                angular.forEach(arguments, function (val, key) {
-                    if (key < 2) {
-                        return true;
-                    }
+                ng.forEach(arguments, function (val, key) {
+                  if (key < 2) {
+                    return true;
+                  }
 
-                    $scope[args[key]] = val;
+                  $scope[args[key]] = val;
                 });
 
-                if (angular.isObject(options.methods)) {
-                    angular.forEach(options.methods, function (fn, method) {
-                        $scope[method] = function() {
-                            return fn.apply(this, Array.prototype.slice.call(arguments, 1));
-                        }
-                    });
+                if (ng.isObject(options.methods)) {
+                  ng.forEach(options.methods, function (fn, method) {
+                    $scope[method] = function() {
+                      return fn.apply(this, Array.prototype.slice.call(arguments, 1));
+                    };
+                  });
                 }
 
                 $scope.next = function () {
-                    $modalInstance.close($scope);
+                  $rootScope.modalActive = false;
+                  $modalInstance.close($scope);
                 };
 
                 $scope.cancel = function () {
-                    $modalInstance.dismiss( 'cancel' );
+                  $modalInstance.dismiss( 'cancel' );
                 };
-            });
+              }
+            );
 
-            var modalInstance = $modal.open ({
-                templateUrl: template,
-                resolve: options.resolve,
-                controller: args
-            });
+          }
 
-            modalInstance.result.then(function ( obj ) {
-                action( obj, index )
-            }, function () { });
-        }
+          $rootScope.modalActive = true;
+
+          var modalInstance = $modal.open({
+            templateUrl: template,
+            resolve: options.resolve,
+            controller: options.controller ? options.controller : args
+          });
+
+          modalInstance.result.then(function ( obj ) {
+            if ( !options.controller ) {
+              action( obj, index );
+            } else {
+              $rootScope.modalActive = false;
+            }
+          }, function () { });
+        };
 
         return modals;
 
