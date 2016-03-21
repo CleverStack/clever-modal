@@ -12,14 +12,14 @@ define(['angular'], function (ng) {
     'ui.bootstrap'
   ]);
 
-  module.config( [ '$provide', function( $provide ) {
+  module.config( [ '$provide', 'TemplateProvider', function( $provide, TemplateProvider ) {
     $provide.decorator('modalBackdropDirective', [ '$delegate', function( $delegate ) {
-      $delegate[0].templateUrl = ['modules/cs_modal/views/', $delegate[0].name, '.html'].join('');
+      $delegate[0].templateUrl = TemplateProvider.view('cs_modal', $delegate[0].name);
       return $delegate;
     }]);
 
     $provide.decorator('modalWindowDirective', [ '$delegate', function( $delegate ) {
-      $delegate[0].templateUrl = ['modules/cs_modal/views/', $delegate[0].name, '.html'].join('');
+      $delegate[0].templateUrl = TemplateProvider.view('cs_modal', $delegate[0].name);
       return $delegate;
     }]);
   }]);
