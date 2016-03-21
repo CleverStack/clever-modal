@@ -1,8 +1,9 @@
 {
   "name": "clever-modal",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "authors": [
-    "Daniel Durante <me@danieldurante.com>"
+    "Daniel Durante <me@danieldurante.com>",
+    "Richard Gustin <richard.gustin86@gmail.com>"
   ],
   "description": "This module will provides a factory for making modals.",
   "main": "main.js",
